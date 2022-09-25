@@ -49,6 +49,12 @@ def read_users(db: Session = Depends(get_db)):
     users = crud.get_users(db)
     return users
 
+# Todo: criar um servico para autenticacao
+# /users/e-mail/password
+# https://fastapi.tiangolo.com/tutorial/security/first-steps/
+# https://github.com/myplayareas/mybkimages.git
+# https://www.youtube.com/watch?v=fGX71dNjGD0
+
 # Dado um id de usuario, retorna os dados do usuario
 # Todo: checar se o usuario existe
 @app.get("/users/{user_id}", response_model=schemas.User)
