@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Response
 from typing import List
 from sqlalchemy.orm import Session
 from . import crud, models, schemas
@@ -6,10 +6,28 @@ from .database import SessionLocal, engine
 import shutil
 import os
 from fastapi.responses import FileResponse
+import json
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Body
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+origins = [
+    "http://localhost",
+    "http://localhost:3000",
+    "http://localhost:8000" 
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Diretorio da aplicacao
 MAIN_PATH = os.path.abspath(os.getcwd())
@@ -54,6 +72,26 @@ def read_users(db: Session = Depends(get_db)):
 # https://fastapi.tiangolo.com/tutorial/security/first-steps/
 # https://github.com/myplayareas/mybkimages.git
 # https://www.youtube.com/watch?v=fGX71dNjGD0
+# https://stackoverflow.com/questions/59929028/python-fastapi-error-422-with-post-request-when-sending-json-data
+@app.post("/users/authentication")
+def my_authentication(username:str= Body(..., embed=True), password:str= Body(..., embed=True)):
+    print(username, password)
+    my_dict = {}
+    my_user = {}
+    my_user["id"] = 1
+    my_user["fname"] = "Armando"
+    my_user["lname"] = "Sousa"
+    my_user["username"] = "armando@ufpi.edu.br"
+    my_user["email"] = "armando@ufpi.edu.br"
+    my_user["avatar"] = "https://www.mecallapi.com/users/1.png"
+    my_dict["status"] = "ok"
+    my_dict["message"] = "Logged in"
+    my_dict["accessToken"] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+    my_dict["user"] = my_user  
+    my_json = json.dumps(my_dict)
+    headers = {'Access-Control-Allow-Origin':'*', 'Content-Type': 'application/json'}
+    # 'Content-Type', 'application/json'
+    return Response (content=my_json, media_type="application/json", headers=headers)
 
 # Dado um id de usuario, retorna os dados do usuario
 # Todo: checar se o usuario existe
